@@ -21,7 +21,12 @@ TRANSLATIONS = {
         "reset_btn": "🗑️ Reset Stats",
         "reset_done": "All sleep records has been deleted successfully!",
         "back_btn": "⬅️ Back",
-        "settings_title": "Settings / Настройки:"
+        "settings_title": "Settings / Настройки:",
+        "stats_title": "📊 YOUR SLEEP STATISTICS",
+        "stats_empty": "🤷‍♂️ You don't have any sleep records yet. Click 'Sleep' to start tracking!",
+        "stats_line": "Sleep time",
+        "hours_letter": "h",
+        "minutes_letter": "m"
     },
     "RU": {
         "sleep_btn": "🛏️ Уснуть", 
@@ -33,7 +38,12 @@ TRANSLATIONS = {
         "reset_btn": "🗑️ Сбросить статистику",
         "reset_done": "Все записи о сне успешно удалены!",
         "back_btn": "⬅️ Назад",
-        "settings_title": "Настройки / Settings:"
+        "settings_title": "Настройки / Settings:",
+        "stats_title": "📊 ВАША СТАТИСТИКА СНА",
+        "stats_empty": "🤷‍♂️ У вас пока нет записей о сне. Нажмите «Уснуть», чтобы начать трекинг!",
+        "stats_line": "Время сна",
+        "hours_letter": "ч",
+        "minutes_letter": "м"
     }
 }
 
@@ -82,8 +92,33 @@ async def awake_handler(message: Message):
 
 @dp.message((F.text == "💾 Statistics") | (F.text == "💾 Статистика"))
 async def stats_handler(message: Message):
-    stats_text = get_user_stats(message.from_user.id)
-    await message.answer(stats_text)
+    user_id = message.from_user.id
+    lang = get_user_language(user_id)
+    buttons = TRANSLATIONS[lang]
+    
+    records = get_user_stats(user_id)
+    
+    if not records:
+        await message.answer(buttons["stats_empty"])
+        return
+
+    response_text = f"<b>{buttons['stats_title']}</b>\n"
+    response_text += "━━━━━━━━━━━━━━━━━━━━━\n"
+    
+    for date_display, start_display, end_display, hours, minutes in records:
+        h_let = buttons["hours_letter"]
+        m_let = buttons["minutes_letter"]
+        lbl = buttons["stats_line"]
+        
+        response_text += (
+            f"📅 <b>{date_display}</b>\n"
+            f"🌙 {start_display} — ☀️ {end_display}\n"
+            f"✨ {lbl}: <code>{hours}{h_let} {minutes}{m_let}</code>\n"
+            f"─────────────────────\n"
+        )
+        
+    response_text += "━━━━━━━━━━━━━━━━━━━━━"
+    await message.answer(response_text, parse_mode="HTML")
 
 @dp.message((F.text == "⚙️ Settings") | (F.text == "⚙️ Настройки"))
 async def settings_handler(message: Message):
