@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 import sqlite3
 import os
 from datetime import datetime
@@ -31,7 +32,7 @@ def add_user(user_id):
     conn.close()
 
 def save_sleep_start(user_id):
-    now = datetime.now()
+    now = datetime.now(ZoneInfo("Europe/Moscow"))
     time_string = now.strftime("%Y-%m-%d %H:%M:%S")
     
     conn = sqlite3.connect("/data/sleep_tracker.db")
@@ -55,7 +56,7 @@ def set_user_language(user_id, lang):
     conn.close()
 
 def save_sleep_end(user_id):
-    now = datetime.now()
+    now = datetime.now(ZoneInfo("Europe/Moscow"))
     time_string = now.strftime("%Y-%m-%d %H:%M:%S")
     
     conn = sqlite3.connect("/data/sleep_tracker.db")
@@ -83,27 +84,25 @@ def get_user_stats(user_id):
     conn.close()
     
     if not records:
-        return "You don't have any sleep records yet!"
+        return []
         
-    response_text = "📊 Your Sleep Statistics:\n\n"
-    
+    stats_list = []
     for start_str, end_str in records:
         start_time = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S")
         end_time = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
         
         duration = end_time - start_time
-        
         total_seconds = int(duration.total_seconds())
         hours = total_seconds // 3600
         minutes = (total_seconds % 3600) // 60
         
         date_display = start_time.strftime("%Y.%m.%d")
-        start_display = start_time.strftime("%H:%M:%S")
-        end_display = end_time.strftime("%H:%M:%S")
+        start_display = start_time.strftime("%H:%M")
+        end_display = end_time.strftime("%H:%M")
         
-        response_text += f"• {date_display}: {start_display} - {end_display} | Sleep time - {hours}h {minutes}m\n"
+        stats_list.append((date_display, start_display, end_display, hours, minutes))
         
-    return response_text
+    return stats_list
 
 def get_user_language(user_id):
     conn = sqlite3.connect("/data/sleep_tracker.db")
@@ -112,8 +111,9 @@ def get_user_language(user_id):
     row = cur.fetchone()
     conn.close()
     if row:
-        return row[0]
+        return row
     return "EN"
+
 def delete_user_stats(user_id):
     conn = sqlite3.connect("/data/sleep_tracker.db")
     cur = conn.cursor()
