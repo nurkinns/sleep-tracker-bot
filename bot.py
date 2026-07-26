@@ -8,7 +8,8 @@ from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
 from aiogram.client.session.aiohttp import AiohttpSession
 
-bot = Bot(token=os.getenv("BOT_TOKEN"))
+session = AiohttpSession(api_base="https://amvera.ru")
+bot = Bot(token=os.getenv("BOT_TOKEN"), session=session)
 dp = Dispatcher()
 
 TRANSLATIONS = {
