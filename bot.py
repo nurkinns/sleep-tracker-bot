@@ -6,6 +6,7 @@ load_dotenv()
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
+from datetime import datetime, timedelta
 
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
@@ -100,6 +101,8 @@ async def awake_handler(message: Message):
 async def stats_handler(message: Message):
     user_id = message.from_user.id
     lang = get_user_language(user_id)
+    if isinstance(lang, tuple):
+        lang = lang[0]
     buttons = TRANSLATIONS[lang]
     
     records = get_user_stats(user_id)
@@ -116,10 +119,29 @@ async def stats_handler(message: Message):
         m_let = buttons["minutes_letter"]
         lbl = buttons["stats_line"]
         
+        if hours >= 24:
+            days_ago = hours // 24
+            
+            try:
+                end_date_obj = datetime.strptime(date_display, "%Y.%m.%d")
+                start_date_obj = end_date_obj - timedelta(days=days_ago)
+                
+                start_date_str = start_date_obj.strftime("%d.%m.%Y")
+                end_date_str = end_date_obj.strftime("%d.%m.%Y")
+                
+                time_line = f"🌙 {start_display} {start_date_str[:-5]} — ☀️ {end_display} {end_date_str[:-5]}"
+            except Exception:
+                time_line = f"🌙 {start_display} — ☀️ {end_display} (+{days_ago}дн.)"
+            remaining_hours = hours % 24
+            time_duration = f"<code>{days_ago}д {remaining_hours}{h_let} {minutes}{m_let}</code>"
+        else:
+            time_line = f"🌙 {start_display} — ☀️ {end_display}"
+            time_duration = f"<code>{hours}{h_let} {minutes}{m_let}</code>"
+        
         response_text += (
             f"📅 <b>{date_display}</b>\n"
-            f"🌙 {start_display} — ☀️ {end_display}\n"
-            f"✨ {lbl}: <code>{hours}{h_let} {minutes}{m_let}</code>\n"
+            f"{time_line}\n"
+            f"✨ {lbl}: {time_duration}\n"
             f"─────────────────────\n"
         )
         
