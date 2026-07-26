@@ -7,8 +7,10 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
 from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.client.telegram import TelegramAPIServer
 
-session = AiohttpSession(api_base="https://amvera.ru")
+amvera_server = TelegramAPIServer.from_base("https://amvera.ru")
+session = AiohttpSession(api=amvera_server)
 bot = Bot(token=os.getenv("BOT_TOKEN"), session=session)
 dp = Dispatcher()
 
