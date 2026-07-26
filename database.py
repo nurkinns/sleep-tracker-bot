@@ -110,8 +110,9 @@ def get_user_language(user_id):
     cur.execute("SELECT language FROM users WHERE tg_user_id = ?", (user_id,))
     row = cur.fetchone()
     conn.close()
+    
     if row:
-        return row
+        return row[0]
     return "EN"
 
 def delete_user_stats(user_id):
