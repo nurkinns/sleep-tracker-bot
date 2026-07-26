@@ -1,0 +1,4 @@
+.env
+sleep_tracker.db
+__pycache__/
+.vscode/
