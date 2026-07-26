@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
 
-bot = Bot(token=os.getenv("BOT_TOKEN"), session=session)
+bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
 TRANSLATIONS = {
