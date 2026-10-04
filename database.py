@@ -24,6 +24,13 @@ CREATE TABLE IF NOT EXISTS users (
 connect.commit()
 connect.close()
 
+connect = sqlite3.connect("/data/sleep_tracker.db")
+cursor = connect.cursor()
+cursor.execute(
+    "INSERT INTO sleep_records VALUES (?, ?, ?)",
+    (123, "2026-10-01 23:00:00", "2026-10-02 07:00:00")
+)
+
 def add_user(user_id):
     conn = sqlite3.connect("/data/sleep_tracker.db")
     cur = conn.cursor()
@@ -121,4 +128,39 @@ def delete_user_stats(user_id):
     conn.commit()
     conn.close()
 
+def get_average_sleep_duration(user_id):
+
+    conn = sqlite3.connect("/data/sleep_tracker.db")
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT tg_sleep_start, tg_sleep_end
+        FROM sleep_records
+        WHERE tg_user_id = ?
+        """,
+        (user_id,)
+    )
+
+    durations = cur.fetchall()
+
+    if not durations:
+        conn.close()
+        return 0
+
+    total_seconds = 0
+
+    for start, end in durations:
+        start = datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
+        end = datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
+
+        duration = end - start
+        total_seconds += duration.total_seconds()
+
+    average_seconds = total_seconds / len(durations)
+    average_hours = average_seconds / 3600
+
+    conn.close()
+
+    return average_hours
 #made by "nurkinns" on GitHub with using AI.

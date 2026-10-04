@@ -1,4 +1,4 @@
-from database import add_user, save_sleep_start, save_sleep_end, get_user_stats, set_user_language, get_user_language, delete_user_stats
+from database import add_user, save_sleep_start, save_sleep_end, get_user_stats, set_user_language, get_user_language, delete_user_stats, get_average_sleep_duration
 import os
 from dotenv import load_dotenv
 import asyncio
@@ -83,6 +83,9 @@ async def awake_handler(message: Message):
 @dp.message((F.text == "💾 Statistics") | (F.text == "💾 Статистика"))
 async def stats_handler(message: Message):
     stats_text = get_user_stats(message.from_user.id)
+    average_sleep = get_average_sleep_duration(message.from_user.id)
+    stats_text = stats_text + "\n\nСреднее время сна: " + str(average_sleep) + "ч."
+    
     await message.answer(stats_text)
 
 @dp.message((F.text == "⚙️ Settings") | (F.text == "⚙️ Настройки"))
