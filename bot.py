@@ -82,10 +82,27 @@ async def awake_handler(message: Message):
 
 @dp.message((F.text == "💾 Statistics") | (F.text == "💾 Статистика"))
 async def stats_handler(message: Message):
-    stats_text = get_user_stats(message.from_user.id)
+
+    stats = get_user_stats(message.from_user.id)
     average_sleep = get_average_sleep_duration(message.from_user.id)
-    stats_text = stats_text + "\n\nСреднее время сна: " + str(average_sleep) + "ч."
-    
+
+    if not stats:
+        await message.answer("Нет данных о сне.")
+        return
+
+    stats_text = ""
+
+    for date, start, end, hours, minutes in stats:
+        stats_text += (
+            date + " | "
+            + start + " - "
+            + end + " | "
+            + str(hours) + " ч. "
+            + str(minutes) + " мин.\n"
+        )
+
+    stats_text += "\nСреднее время сна: " + str(average_sleep) + " ч."
+
     await message.answer(stats_text)
 
 @dp.message((F.text == "⚙️ Settings") | (F.text == "⚙️ Настройки"))
